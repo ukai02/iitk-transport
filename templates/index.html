@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IITK Transport</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="main-header">
+      <div class="container header-content">
+        <a href="/" class="brand-wrapper">
+          <img
+            src="/static/images/iitk_logo.png"
+            alt="IITK Logo"
+            class="brand-logo"
+          />
+          <span class="brand-name">IITK Transport</span>
+        </a>
+
+        <nav class="main-nav">
+          <a href="/driver" class="nav-link">Drivers</a>
+          <a href="/admin" class="nav-link btn-secondary">Admin</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="hero-section">
+      <div class="container hero-content">
+        <div class="hero-text">
+          <h2 class="headline">Travel seamlessly<br />in IITK</h2>
+          <p class="subheadline">
+            Finding a ride across campus has never been easier. Connect with
+            nearby drivers instantly.
+          </p>
+          <a href="/rider" class="btn-primary btn-large">Search for a Ride</a>
+        </div>
+
+        <div class="hero-image-container">
+          <img
+            src="/static/images/iitk_hero.jpeg"
+            alt="IIT Kanpur Campus Transport"
+            class="hero-image"
+            onerror="
+              this.style.display = 'none';
+              this.parentNode.classList.add('placeholder-active');
+            "
+          />
+        </div>
+      </div>
+    </main>
+
+    <footer class="main-footer">
+      <div class="container">
+        <p>© IITK 2026. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Status - IITK Transport</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="app-body">
+    
+    <header class="app-header">
+        <div class="container header-content">
+            <a href="/driver" class="nav-back"><span>&#8592;</span> Back</a>
+            <h1 class="app-page-title">Update Status</h1>
+            <div style="width: 60px;"></div>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <div class="container">
+            {% if success %}
+            <div class="alert alert-success">{{ success }}</div>
+            {% endif %}
+            {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" class="app-form">
+                
+                <div class="form-group">
+                    <label>Registered Phone Number</label>
+                    <input type="tel" name="phone" placeholder="Enter your phone number" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Current Status</label>
+                    <div class="select-wrapper">
+                        <select name="location">
+                            <option value="Main Gate">Main Gate</option>
+                            <option value="Old Shopping Complex">Old Shopping Complex</option>
+                            <option value="Hall 1">Hall 1</option>
+                            <option value="Hall 14">Hall 14</option>
+                            <option value="Hall 10">Hall 10</option>
+                            <option value="New SAC">New SAC</option>
+                            <option value="Health Centre">Health Centre</option>
+                            <option value="Academic Area">Academic Area</option>
+                            <option value="GH1">GH1</option>
+                            
+                            <option value="Offline" style="color: red; font-weight: bold;">🔴 Go Offline (Stop Work)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary btn-block btn-gold">
+                    Update Status
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container"><p>© IITK 2026. All rights reserved.</p></div>
+    </footer>
+</body>
+</html>

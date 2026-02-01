@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - IITK Transport</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Specific styling to vertically center the login box */
+        .login-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh; /* Takes up mostly the middle of the screen */
+        }
+    </style>
+</head>
+<body class="app-body">
+    
+    <header class="app-header">
+        <div class="container header-content">
+            <a href="/" class="nav-back"><span>&#8592;</span> Home</a>
+            <h1 class="app-page-title">Admin Access</h1>
+            <div style="width: 60px;"></div>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <div class="container login-wrapper">
+            
+            <form method="POST" class="app-form" style="width: 100%; max-width: 400px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div class="icon-circle" style="margin: 0 auto; background: #e8f5e9; color: var(--primary-color);">
+                        🔒
+                    </div>
+                    <h2 style="margin-top: 15px; color: var(--primary-dark);">Secure Login</h2>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Restricted to authorized personnel only.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" placeholder="Enter Admin ID" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter Password" required>
+                </div>
+
+                <button type="submit" class="btn-primary btn-block">
+                    Login to Dashboard
+                </button>
+            </form>
+
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container"><p>© IITK 2026. Admin Portal.</p></div>
+    </footer>
+</body>
+</html>

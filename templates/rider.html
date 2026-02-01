@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find a Ride - IITK Transport</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="app-body">
+    
+    <header class="app-header">
+        <div class="container header-content">
+            <a href="/" class="nav-back">
+                <span>&#8592;</span> Home
+            </a>
+            
+            <h1 class="app-page-title">Nearby Drivers</h1>
+            
+            <div style="width: 60px;"></div>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <div class="container">
+            <p class="status-text">Live updates from campus zones</p>
+
+            <div class="driver-list">
+                {% for driver in drivers %}
+                <div class="driver-card">
+                    <div class="driver-avatar-wrapper">
+                        <img src="/static/images/{{ driver.photo_url }}" 
+                             alt="{{ driver.name }}" 
+                             class="driver-avatar"
+                             onerror="this.src='/static/images/default_driver.png';">
+                    </div>
+
+                    <div class="driver-info">
+                        <h3 class="driver-name">{{ driver.name }}</h3>
+                        <div class="driver-meta">
+                            <span class="vehicle-badge">{{ driver.vehicle_type }}</span>
+                            <span class="location-text">• {{ driver.location_name }}</span>
+                        </div>
+                        <small class="time-text">Updated: {{ driver.last_updated }}</small>
+                    </div>
+
+                    <a href="tel:{{ driver.phone }}" class="btn-call">
+                        Call Now
+                    </a>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <h3>No drivers online right now</h3>
+                    <p>Please check back in a few minutes.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>© IITK 2026. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - IITK Transport</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* ... (Keep all your existing CSS for badges, menus, etc.) ... */
+        /* Paste the CSS from the previous step here if you overwrote the file */
+        
+        /* --- STATUS BADGES --- */
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-online { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .status-offline { background-color: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+
+        .btn-status-toggle { padding: 8px 20px; border-radius: 50px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; border: none; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .toggle-off { background-color: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+        .toggle-off:hover { background-color: #fef3c7; }
+        .toggle-on { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        .toggle-on:hover { background-color: #e5e7eb; }
+
+        .driver-card { position: relative; z-index: 1; transition: transform 0.2s, box-shadow 0.2s; overflow: visible !important; }
+        .driver-card.is-active-layer { z-index: 100 !important; }
+
+        .menu-container { position: relative; margin-left: 12px; }
+        .kebab-btn { background: transparent; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; color: #9ca3af; transition: all 0.2s; padding-bottom: 8px; }
+        .kebab-btn:hover, .kebab-btn.active { background-color: #f3f4f6; color: var(--primary-color); }
+
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 45px; background-color: white; min-width: 180px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1); border-radius: 12px; z-index: 999; border: 1px solid #e5e7eb; padding: 6px; animation: fadeIn 0.1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .dropdown-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; text-align: left; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: #374151; transition: all 0.2s; }
+        .dropdown-item:hover { background-color: #f9fafb; color: var(--primary-color); }
+        .item-delete { color: #dc2626; margin-top: 4px; border-top: 1px solid #f3f4f6; border-radius: 0 0 8px 8px; }
+        .item-delete:hover { background-color: #fef2f2; color: #b91c1c; }
+        .show-menu { display: block; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-box { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .nav-logout { color: white; text-decoration: none; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; transition: background 0.3s; }
+        .nav-logout:hover { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="app-body">
+    
+    <header class="app-header">
+        <div class="container header-content">
+            <a href="/" class="nav-back"><span>&#8592;</span> Home</a>
+            <h1 class="app-page-title">Admin Database</h1>
+            <a href="/admin/logout" class="nav-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0 20px 0;">
+                <div>
+                    <h2 style="color: var(--primary-dark); margin-bottom: 5px;">Driver Registry</h2>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Manage status and details</p>
+                </div>
+                <button onclick="fetchAllDrivers()" class="btn-secondary" style="font-size: 0.8rem;">Refresh List</button>
+            </div>
+
+            <div id="driver-list-container" class="driver-list"></div>
+        </div>
+    </main>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="margin-top:0; color: var(--primary-dark);">Edit Driver</h2>
+            <form id="editForm" onsubmit="submitEdit(event)">
+                <input type="hidden" id="edit-id">
+                
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="edit-phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Vehicle</label>
+                    <div class="select-wrapper">
+                        <select id="edit-vehicle">
+                            <option value="Auto">Auto Rickshaw</option>
+                            <option value="E-Rick">E-Rickshaw</option>
+                            <option value="Taxi">Taxi Cab</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Location</label>
+                    <div class="select-wrapper">
+                        <select id="edit-location">
+                            <option value="Main Gate">Main Gate</option>
+                            <option value="Old Shopping Complex">Old Shopping Complex</option>
+                            <option value="Hall 1">Hall 1</option>
+                            <option value="Hall 14">Hall 14</option>
+                            <option value="Hall 10">Hall 10</option>
+                            <option value="New SAC">New SAC</option>
+                            <option value="Health Centre">Health Centre</option>
+                            <option value="Academic Area">Academic Area</option>
+                            <option value="GH1">GH1</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" onclick="closeModal()" class="btn-secondary" style="border:none;">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container"><p>© IITK 2026. Admin Panel.</p></div>
+    </footer>
+
+    <script>
+        async function fetchAllDrivers() {
+            try {
+                const response = await fetch('/api/admin/all_drivers');
+                const drivers = await response.json();
+                const listContainer = document.getElementById('driver-list-container');
+                listContainer.innerHTML = '';
+
+                if (drivers.length === 0) listContainer.innerHTML = '<div class="empty-state"><p>No drivers found.</p></div>';
+
+                drivers.forEach(driver => {
+                    const isOnline = driver.is_online === 1;
+                    const statusHtml = isOnline ? `<span class="status-badge status-online">Online</span>` : `<span class="status-badge status-offline">Offline</span>`;
+                    const toggleBtn = isOnline ? `<button class="btn-status-toggle toggle-off" onclick="toggleStatus(${driver.driver_id}, 'offline')">Mark Offline</button>` : `<button class="btn-status-toggle toggle-on" onclick="toggleStatus(${driver.driver_id}, 'online')">Mark Online</button>`;
+                    const location = driver.location_name || 'Main Gate'; // Default handling
+
+                    const card = document.createElement('div');
+                    card.className = 'driver-card';
+                    card.id = `card-${driver.driver_id}`;
+
+                    // PASSED 'location' to openModal function
+                    card.innerHTML = `
+                        <div class="driver-avatar-wrapper">
+                            <img src="/static/images/${driver.photo_url || 'default_driver.png'}" class="driver-avatar"> 
+                        </div>
+                        <div class="driver-info">
+                            <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px;">
+                                <h3 class="driver-name" style="margin:0;">${driver.name}</h3>
+                                ${statusHtml}
+                            </div>
+                            <div class="driver-meta">
+                                <span class="vehicle-badge">${driver.vehicle_type}</span>
+                                <span class="location-text">• ${location}</span>
+                            </div>
+                            <small style="color:#999;">${driver.phone}</small>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            ${toggleBtn}
+                            <div class="menu-container">
+                                <button class="kebab-btn" id="btn-${driver.driver_id}" onclick="toggleMenu(event, ${driver.driver_id})">⋮</button>
+                                <div id="menu-${driver.driver_id}" class="dropdown-menu">
+                                    <button class="dropdown-item" onclick="openModal(${driver.driver_id}, '${driver.name}', '${driver.phone}', '${driver.vehicle_type}', '${location}')">
+                                        Edit Details
+                                    </button>
+                                    <button class="dropdown-item item-delete" onclick="deleteDriver(${driver.driver_id})">
+                                        Delete Permanently
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+                });
+            } catch (error) { console.error("Error:", error); }
+        }
+
+        async function toggleStatus(id, action) {
+            let url = action === 'offline' ? `/api/driver/offline/${id}` : `/api/driver/online/${id}`;
+            await fetch(url, { method: 'POST' });
+            fetchAllDrivers(); 
+        }
+
+        function toggleMenu(event, id) {
+            event.stopPropagation();
+            const menu = document.getElementById(`menu-${id}`);
+            const btn = document.getElementById(`btn-${id}`);
+            const card = document.getElementById(`card-${id}`);
+            document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show-menu'));
+            document.querySelectorAll('.kebab-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.driver-card').forEach(el => el.classList.remove('is-active-layer'));
+            if (!menu.classList.contains('show-menu')) {
+                menu.classList.add('show-menu');
+                btn.classList.add('active');
+                card.classList.add('is-active-layer');
+            }
+        }
+        window.onclick = function(event) {
+            if (!event.target.closest('.menu-container')) {
+                document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show-menu'));
+                document.querySelectorAll('.kebab-btn').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.driver-card').forEach(el => el.classList.remove('is-active-layer'));
+            }
+        }
+
+        // --- UPDATED EDIT LOGIC ---
+        function openModal(id, name, phone, vehicle, location) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-phone').value = phone;
+            document.getElementById('edit-vehicle').value = vehicle;
+            
+            // Set Location Value
+            // Note: If location name doesn't match list exactly, it might show first option
+            document.getElementById('edit-location').value = location;
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+        
+        async function submitEdit(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const data = {
+                name: document.getElementById('edit-name').value,
+                phone: document.getElementById('edit-phone').value,
+                vehicle: document.getElementById('edit-vehicle').value,
+                location: document.getElementById('edit-location').value // Capture location
+            };
+            const res = await fetch(`/api/driver/edit/${id}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if(result.success) { closeModal(); fetchAllDrivers(); } 
+            else { alert(result.error); }
+        }
+
+        async function deleteDriver(id) {
+            if(confirm('Are you sure you want to PERMANENTLY delete this driver?')) {
+                await fetch(`/api/driver/delete/${id}`, { method: 'POST' });
+                fetchAllDrivers();
+            }
+        }
+
+        fetchAllDrivers();
+    </script>
+</body>
+</html>

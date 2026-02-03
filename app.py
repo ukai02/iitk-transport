@@ -6,13 +6,9 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'super_secret_key_for_demo'
 
-# Use absolute paths for PythonAnywhere compatibility
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, 'database.db')
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static/images')
+DATABASE = 'database.db'
+UPLOAD_FOLDER = 'static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# How long before a driver is auto-removed?
 TIMEOUT_INTERVAL = '45 minutes' 
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -22,7 +18,6 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# --- CLEANUP ---
 def cleanup_stale_drivers():
     conn = get_db_connection()
     try:
@@ -38,7 +33,6 @@ def cleanup_stale_drivers():
     finally:
         conn.close()
 
-# --- PUBLIC ROUTES ---
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -47,8 +41,6 @@ def index():
 def rider_view():
     cleanup_stale_drivers()
     conn = get_db_connection()
-    
-    # FIX: strftime formats the date to dd/mm/yyyy HH:MM:SS
     drivers = conn.execute('''
         SELECT d.name, d.phone, d.vehicle_type, d.photo_url, s.location_name, 
                strftime('%d/%m/%Y %H:%M:%S', datetime(s.last_updated, '+5 hours', '+30 minutes')) as last_updated
@@ -64,7 +56,6 @@ def rider_view():
 def driver_menu():
     return render_template('driver_menu.html')
 
-# --- DRIVER ROUTES ---
 @app.route('/driver/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
@@ -129,7 +120,6 @@ def update_location():
             
     return render_template('update.html')
 
-# --- ADMIN ROUTES ---
 @app.route('/admin', methods=('GET', 'POST'))
 def admin_login():
     if request.method == 'POST':
@@ -157,12 +147,9 @@ def admin_logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('index'))
 
-# --- API ROUTES ---
-
 @app.route('/api/admin/all_drivers')
 def get_all_drivers_admin():
     conn = get_db_connection()
-    # FIX: Also formatted here for the Admin Panel
     drivers = conn.execute('''
         SELECT d.id as driver_id, d.name, d.phone, d.vehicle_type, d.photo_url, 
                s.location_name, s.is_online, 
@@ -259,10 +246,8 @@ def get_driver_photo():
     else:
         return jsonify({'photo_url': 'default_driver.png'})
 
-
 @app.route('/sms_webhook', methods=['POST'])
 def sms_webhook():
-    # 1. Capture the raw message (keep original case for Names)
     if request.is_json:
         data = request.json
         phone = data.get('phone')
@@ -275,21 +260,16 @@ def sms_webhook():
     if phone: 
         phone = phone.replace('+91', '').replace(' ', '')
     
-    # Create an UPPERCASE version for command checking
     cmd_msg = raw_msg.upper()
     print(f"DEBUG: SMS from {phone}: {raw_msg}")
 
     conn = get_db_connection()
     try:
-        # Check if driver exists
         driver = conn.execute('SELECT id, name FROM drivers WHERE phone = ?', (phone,)).fetchone()
         response_text = ""
         
         if driver:
-            # --- EXISTING DRIVER LOGIC ---
             if cmd_msg.startswith("ON "):
-                # Extract location from the original message to keep casing nice (optional)
-                # Or just use the upper case one. Let's use UPPER for standard locations.
                 loc = cmd_msg[3:].strip() 
                 conn.execute('''
                     INSERT OR REPLACE INTO driver_status (driver_id, location_name, is_online, last_updated) 
@@ -307,19 +287,13 @@ def sms_webhook():
                 response_text = f"Hello {driver['name']}. Send 'ON [Location]' or 'OFF'."
 
         else:
-            # --- NEW REGISTRATION LOGIC ---
             if cmd_msg.startswith("REGISTER "):
-                # Expected format: "REGISTER Rohit Auto"
-                parts = raw_msg.split(' ') # Split by space
+                parts = raw_msg.split(' ')
                 
-                # We need at least 3 parts: Command, Name, Vehicle
                 if len(parts) >= 3:
-                    # Vehicle is usually the last word
                     vehicle = parts[-1]
-                    # Name is everything in between
                     name = " ".join(parts[1:-1])
                     
-                    # 1. Create Driver (Default Photo)
                     cur = conn.cursor()
                     cur.execute('''
                         INSERT INTO drivers (name, phone, vehicle_type, photo_url) 
@@ -327,7 +301,6 @@ def sms_webhook():
                     ''', (name, phone, vehicle, 'default_driver.png'))
                     new_id = cur.lastrowid
                     
-                    # 2. Set them Online immediately (Default: Main Gate)
                     cur.execute('''
                         INSERT INTO driver_status (driver_id, location_name, is_online, last_updated)
                         VALUES (?, ?, 1, CURRENT_TIMESTAMP)

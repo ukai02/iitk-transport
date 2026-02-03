@@ -7,10 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        /* ... (Keep all your existing CSS for badges, menus, etc.) ... */
-        /* Paste the CSS from the previous step here if you overwrote the file */
-        
-        /* --- STATUS BADGES --- */
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .status-online { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
         .status-offline { background-color: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
@@ -137,13 +133,11 @@
                     const isOnline = driver.is_online === 1;
                     const statusHtml = isOnline ? `<span class="status-badge status-online">Online</span>` : `<span class="status-badge status-offline">Offline</span>`;
                     const toggleBtn = isOnline ? `<button class="btn-status-toggle toggle-off" onclick="toggleStatus(${driver.driver_id}, 'offline')">Mark Offline</button>` : `<button class="btn-status-toggle toggle-on" onclick="toggleStatus(${driver.driver_id}, 'online')">Mark Online</button>`;
-                    const location = driver.location_name || 'Main Gate'; // Default handling
-
+                    const location = driver.location_name || 'Main Gate';
                     const card = document.createElement('div');
                     card.className = 'driver-card';
                     card.id = `card-${driver.driver_id}`;
 
-                    // PASSED 'location' to openModal function
                     card.innerHTML = `
                         <div class="driver-avatar-wrapper">
                             <img src="/static/images/${driver.photo_url || 'default_driver.png'}" class="driver-avatar"> 
@@ -207,15 +201,12 @@
             }
         }
 
-        // --- UPDATED EDIT LOGIC ---
         function openModal(id, name, phone, vehicle, location) {
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-phone').value = phone;
             document.getElementById('edit-vehicle').value = vehicle;
             
-            // Set Location Value
-            // Note: If location name doesn't match list exactly, it might show first option
             document.getElementById('edit-location').value = location;
             
             document.getElementById('editModal').style.display = 'flex';
@@ -230,7 +221,7 @@
                 name: document.getElementById('edit-name').value,
                 phone: document.getElementById('edit-phone').value,
                 vehicle: document.getElementById('edit-vehicle').value,
-                location: document.getElementById('edit-location').value // Capture location
+                location: document.getElementById('edit-location').value 
             };
             const res = await fetch(`/api/driver/edit/${id}`, {
                 method: 'POST',
@@ -252,4 +243,5 @@
         fetchAllDrivers();
     </script>
 </body>
+
 </html>
